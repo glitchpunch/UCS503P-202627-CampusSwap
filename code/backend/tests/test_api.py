@@ -34,6 +34,12 @@ def test_login_sets_session_cookie_and_me_works(client):
     assert me["role"] == "student" and me["email"] == "student1@thapar.edu"
 
 
+def test_status_answers_without_error_when_logged_out(client):
+    assert client.get("/api/auth/status").json() == {"user": None}
+    login(client, "student1@thapar.edu")
+    assert client.get("/api/auth/status").json()["user"]["role"] == "student"
+
+
 def test_wrong_password_is_rejected(client):
     r = login(client, "student1@thapar.edu", password="nope")
     assert r.status_code == 401 and r.json()["error"] == "bad_credentials"

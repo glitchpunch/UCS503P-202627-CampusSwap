@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Cookie, Response
 from sqlalchemy import delete, select
 
-from app.deps import DB, SESSION_COOKIE, SESSION_HOURS, CurrentUser, Now
+from app.deps import DB, SESSION_COOKIE, SESSION_HOURS, CurrentUser, Now, current_user
 from app.errors import DomainError
 from app.models import LoginSession, Student, User
 from app.schemas import LoginIn
@@ -54,3 +54,13 @@ def logout(response: Response, db: DB, cs_session: Annotated[str | None, Cookie(
 @router.get("/me")
 def me(user: CurrentUser) -> dict:
     return me_payload(user)
+
+
+@router.get("/status")
+def status(db: DB, now: Now, cs_session: Annotated[str | None, Cookie()] = None) -> dict:
+    """Who is signed in, answering calmly when nobody is (used by the login page)."""
+    try:
+        user = current_user(db, now, cs_session)
+    except DomainError:
+        return {"user": None}
+    return {"user": me_payload(user)}
