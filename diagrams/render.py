@@ -3,7 +3,7 @@
     python diagrams/render.py
 
 Only the diagram text is sent (hex-encoded in the URL). No Java needed.
-Output goes to diagrams/out/.
+Output goes to docs/diagrams/ so the docs site and the LaTeX report share one copy.
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 SERVER = "https://www.plantuml.com/plantuml"
 HERE = Path(__file__).resolve().parent
-OUT = HERE / "out"
+OUT = HERE.parent / "docs" / "diagrams"
 
 
 def fetch(kind: str, source: str) -> bytes:
