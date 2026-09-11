@@ -1,41 +1,21 @@
-﻿
+
 [build-system]
 requires = ["hatchling","hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tiet-ucs503.github.io/ucs503p-202627odd-template"
-version = "0.0.1"
+name = "campusswap"
+version = "0.1.0"
 authors = [
-  { name="Raghav B. Venkataramaiyer", email="bv.raghav@thapar.edu" },
+  { name = "Jahnavi", email = "jbansal1_be24@thapar.edu" },
+  { name = "Ronit Saini", email = "rsaini1_be24@thapar.edu" },
+  { name = "Ranvir", email = "rmakker_be24@thapar.edu" },
+  { name = "Krishna Kapoor", email = "kkapoor_be24@thapar.edu" },
 ]
-# maintainers = [
-#   { name="Raghav B. Venkataramaiyer",
-#     email="bvraghav@gmail.com" },
-# ]
-description = "UCS503 : Software Engineering : Project Sample"
+description = "CampusSwap: hostel room exchange using Top Trading Cycles (UCS503P project)"
 readme = "README.md"
-requires-python = ">=3.8"
-classifiers = [
-    # See: https://pypi.org/classifiers/
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Development Status :: 3 - Alpha",
-    "Environment :: Console",
-    "Intended Audience :: Developers",
-    "Operating System :: POSIX",
-    "Programming Language :: Unix Shell",
-]
-dependencies = ["click"]
+requires-python = ">=3.12"
 
-[project.urls]
-Homepage = "https://github.com/tiet-ucs503/ucs503p-202627odd-template"
-Issues = "https://github.com/tiet-unc512/ucs503p-202627odd-template/issues"
-
-# Adapted from https://stackoverflow.com/a/50156706
 [tool.pytest.ini_options]
-pythonpath = [
-  "code"
-]
-# THE END -------------------------------------------
+pythonpath = ["code/backend"]
+testpaths = ["code/backend/tests"]
