@@ -71,6 +71,15 @@ function promptCard(title, heading, text, href, cta) {
   </div>`;
 }
 
+// How to describe the step a student is on right now (milestone labels are past tense).
+const NOW_DOING = {
+  submitted: ["Submit your ranked list", "Pick up to 5 rooms and submit them to join the matching pool."],
+  pool: ["Waiting for the next round", "Your list is in the pool. The warden runs matching rounds."],
+  match: ["Match found", "Check your swap chain below."],
+  confirmed: ["Waiting for everyone to confirm", "Every member of the chain must confirm."],
+  approved: ["Waiting for warden approval", "Everyone confirmed. The hostel office approves next."],
+};
+
 function progressCard() {
   const { cycle, milestones } = data;
   const done = milestones.filter((m) => m.state === "done").length;
@@ -103,8 +112,8 @@ function progressCard() {
   <div class="bg-gradient-to-br from-white via-white to-amber-50/50 rounded-3xl p-6 border-2 border-amber-200 shadow-sm flex flex-col justify-between relative overflow-hidden">
     <div class="relative z-10">
       <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Your progress</span>
-      <h3 class="text-xl font-extrabold text-slate-900 tracking-tight mt-2">${current ? current.label : "All steps done"}</h3>
-      <p class="text-xs text-slate-500 mt-1">${current ? "This is the step you're on now." : "Your exchange is complete."}</p>
+      <h3 class="text-xl font-extrabold text-slate-900 tracking-tight mt-2">${current ? NOW_DOING[current.key][0] : "All steps done"}</h3>
+      <p class="text-xs text-slate-500 mt-1">${current ? NOW_DOING[current.key][1] : "Your exchange is complete."}</p>
     </div>
     <div class="mt-6 flex flex-col gap-2">
       <div class="flex justify-between text-xs font-mono"><span class="text-slate-500">Steps done</span><span class="text-primary font-bold">${done} of ${milestones.length}</span></div>
@@ -247,7 +256,7 @@ function lowerGrid() {
     : `<p class="py-6 text-center text-xs text-slate-400">Nothing yet. Your activity will show up here.</p>`;
   const steps = milestones.map((m) => {
     if (m.state === "done") return html`<div class="milestone-item flex items-start gap-3 p-3 rounded-2xl bg-emerald-50/60 border border-emerald-100"><span class="material-symbols-outlined text-[20px] text-emerald-600">check_circle</span><span class="text-xs font-bold text-slate-600 mt-0.5">${m.label}</span></div>`;
-    if (m.state === "current") return html`<div class="milestone-item flex items-start gap-3 p-3 rounded-2xl bg-rose-50 border-2 border-rose-300 shadow-xs"><span class="material-symbols-outlined text-[20px] text-primary">radio_button_checked</span><div class="flex flex-col"><span class="text-xs font-extrabold text-slate-900">${m.label}</span><span class="text-[10px] font-bold text-primary flex items-center gap-1 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>You are here</span></div></div>`;
+    if (m.state === "current") return html`<div class="milestone-item flex items-start gap-3 p-3 rounded-2xl bg-rose-50 border-2 border-rose-300 shadow-xs"><span class="material-symbols-outlined text-[20px] text-primary">radio_button_checked</span><div class="flex flex-col"><span class="text-xs font-extrabold text-slate-900">${NOW_DOING[m.key][0]}</span><span class="text-[10px] font-bold text-primary flex items-center gap-1 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>You are here</span></div></div>`;
     return html`<div class="milestone-item flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 opacity-65"><span class="material-symbols-outlined text-[20px] text-slate-400">lock</span><span class="text-xs font-semibold text-slate-700 mt-0.5">${m.label}</span></div>`;
   }).join("");
   const pending = milestones.filter((m) => m.state !== "done").length;

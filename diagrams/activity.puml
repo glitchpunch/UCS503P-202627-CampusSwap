@@ -35,17 +35,16 @@ repeat while (Student in a chain?) is (no: stay in the pool)
 ->yes;
 :Mark request **matched**;\nstart 48-hour deadline;
 |Student|
-:Review the swap chain;
-if (Everyone confirms before the deadline?) then (yes)
-  |System|
+:Review the swap chain and\nconfirm or decline;
+|System|
+if (Everyone confirmed before the deadline?) then (yes)
   :Cycle **confirmed**;
   |Warden|
   :Approve the swap;
   |System|
   :Move each student to their new seat;\nrequests **completed**;
   stop
-else (someone declines / deadline passes)
-  |System|
+else (someone declined / deadline passed)
   :Cycle **dissolved**;
   :Decliners and non-answerers: **withdrawn**\nEveryone else: back to **open**;
   stop

@@ -1,5 +1,6 @@
 @startuml class
 ' CampusSwap — Class diagram (prototype stage)
+set separator none
 skinparam dpi 170
 skinparam defaultFontName "Arial"
 skinparam shadowing false
