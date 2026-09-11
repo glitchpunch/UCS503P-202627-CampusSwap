@@ -329,8 +329,8 @@ function wireTabs() {
 async function act(button, label, path, success) {
   const restore = setBusy(button, label);
   try {
-    await api(path, { method: path.includes("requests") ? "DELETE" : "POST" });
-    toast(...success);
+    const result = await api(path, { method: path.includes("requests") ? "DELETE" : "POST" });
+    toast(...(typeof success === "function" ? success(result) : success));
     await load();
   } catch (error) {
     restore();
@@ -346,7 +346,9 @@ function wireActions() {
     act(e.currentTarget, "Withdrawing…", "/api/requests/current", ["Request withdrawn", "You're no longer in the matching pool.", { icon: "undo" }]);
   });
   $("#btn-accept")?.addEventListener("click", (e) =>
-    act(e.currentTarget, "Confirming…", `/api/cycles/${cycle.id}/accept`, ["Swap confirmed", "We'll tell you when everyone has confirmed.", { icon: "verified" }]));
+    act(e.currentTarget, "Confirming…", `/api/cycles/${cycle.id}/accept`, (result) => (result.status === "confirmed"
+      ? ["Everyone has confirmed 🎉", "The warden approves next. Then the rooms change hands.", { icon: "verified" }]
+      : ["Swap confirmed", "Waiting for the other members to confirm.", { icon: "verified" }])));
   $("#btn-decline")?.addEventListener("click", (e) => {
     if (!confirm("Decline this swap? The chain will be cancelled for everyone and your request will close.")) return;
     act(e.currentTarget, "Declining…", `/api/cycles/${cycle.id}/decline`, ["Swap declined", "The chain was cancelled. Your request is closed.", { icon: "block", tone: "error" }]);
