@@ -1,0 +1,65 @@
+@startuml use-case
+' CampusSwap — Use Case diagram (prototype stage)
+left to right direction
+skinparam dpi 180
+skinparam defaultFontName "Arial"
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFF0F2
+  BorderColor #FF385C
+  ArrowColor #475569
+}
+skinparam rectangle {
+  BorderColor #475569
+  FontStyle bold
+}
+
+actor "Student" as Student
+actor "Hostel Staff\n(Warden)" as Warden
+
+rectangle "CampusSwap" {
+  usecase "Log in" as Login
+  usecase "Browse and filter rooms" as Browse
+  usecase "Submit ranked swap request\n(up to 5 rooms)" as Submit
+  usecase "Validate request\n(own room, duplicates,\nhostel gender, one active)" as Validate
+  usecase "Withdraw request" as Withdraw
+  usecase "View status and swap chain" as ViewChain
+  usecase "Confirm swap" as Confirm
+  usecase "Decline swap" as Decline
+  usecase "Expire unanswered swaps\n(48-hour deadline)" as Expire
+  usecase "Run TTC matching round" as Run
+  usecase "Preview round (dry run)" as DryRun
+  usecase "Compare TTC with\n1:1-only swaps" as Compare
+  usecase "Approve confirmed swap" as Approve
+  usecase "Export results (CSV)" as Export
+}
+
+Student --> Login
+Student --> Browse
+Student --> Submit
+Student --> Withdraw
+Student --> ViewChain
+Student --> Confirm
+Student --> Decline
+
+Warden --> Login
+Warden --> Run
+Warden --> Compare
+Warden --> Approve
+Warden --> Export
+
+Submit ..> Validate : <<include>>
+Run ..> Expire : <<include>>
+Confirm ..> Expire : <<include>>
+Decline ..> Expire : <<include>>
+DryRun ..> Run : <<extend>>
+Compare ..> DryRun : <<include>>
+
+note right of Expire
+  Checked whenever a round runs or a
+  member answers; no background timer
+  in the prototype.
+end note
+@enduml

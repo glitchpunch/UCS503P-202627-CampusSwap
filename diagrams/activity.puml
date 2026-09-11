@@ -1,0 +1,52 @@
+@startuml activity
+' CampusSwap — Activity diagram: life of a swap request
+skinparam dpi 170
+skinparam defaultFontName "Arial"
+skinparam shadowing false
+skinparam activity {
+  BackgroundColor #FFF0F2
+  BorderColor #FF385C
+  DiamondBackgroundColor #FFF7EB
+  DiamondBorderColor #FFA114
+  ArrowColor #475569
+}
+skinparam swimlane {
+  BorderColor #94A3B8
+  TitleFontStyle bold
+}
+
+|Student|
+start
+:Log in with Thapar email;
+repeat
+  :Browse rooms in eligible hostels;
+  :Rank up to 5 rooms and submit;
+  |System|
+repeat while (Request valid?) is (no: show the reason)
+->yes;
+:Save request as **open**\nand give a tracking ID;
+repeat
+  |Warden|
+  :Run TTC matching round;
+  |System|
+  :Each student points at the owner\nof their best available room;
+  :Closed loops become swap chains;
+repeat while (Student in a chain?) is (no: stay in the pool)
+->yes;
+:Mark request **matched**;\nstart 48-hour deadline;
+|Student|
+:Review the swap chain and\nconfirm or decline;
+|System|
+if (Everyone confirmed before the deadline?) then (yes)
+  :Cycle **confirmed**;
+  |Warden|
+  :Approve the swap;
+  |System|
+  :Move each student to their new seat;\nrequests **completed**;
+  stop
+else (someone declined / deadline passed)
+  :Cycle **dissolved**;
+  :Decliners and non-answerers: **withdrawn**\nEveryone else: back to **open**;
+  stop
+endif
+@enduml

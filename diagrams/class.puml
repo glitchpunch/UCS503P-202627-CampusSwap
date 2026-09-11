@@ -1,0 +1,171 @@
+@startuml class
+' CampusSwap — Class diagram (prototype stage)
+set separator none
+skinparam dpi 170
+skinparam defaultFontName "Arial"
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #475569
+  ArrowColor #475569
+}
+skinparam package {
+  BorderColor #94A3B8
+  FontStyle bold
+}
+hide empty methods
+
+package "Data model (app/models.py)" {
+  abstract class User {
+    id : int
+    email : str
+    name : str
+    password_hash : str
+    role : str
+  }
+  class Student {
+    roll_no : str
+    gender : "M" | "F"
+    year : int
+    branch : str
+  }
+  class Admin
+  class LoginSession {
+    token_hash : str
+    expires_at : datetime
+  }
+  class Hostel {
+    code : str
+    name : str
+    gender : "M" | "F"
+    warden_name : str
+  }
+  class Room {
+    block : str
+    floor : int
+    number : str
+    seater : 1..3
+    ac : bool
+    washroom : str
+    tags : str
+  }
+  class Seat {
+    label : str
+  }
+  class SwapRequest {
+    tracking_id : str
+    status : RequestStatus
+    created_at : datetime
+  }
+  class Preference {
+    rank : 1..5
+  }
+  class MatchRun {
+    algorithm : "ttc" | "pairwise"
+    dry_run : bool
+    pool_size : int
+    matched : int
+    yield_pct : float
+    trace : text
+  }
+  class SwapCycle {
+    status : CycleStatus
+    deadline : datetime
+  }
+  class CycleMember {
+    position : int
+    received_rank : int
+    response : Response
+  }
+  class Event {
+    kind : str
+    message : str
+    created_at : datetime
+  }
+  enum RequestStatus {
+    open
+    matched
+    completed
+    withdrawn
+  }
+  enum CycleStatus {
+    proposed
+    confirmed
+    approved
+    dissolved
+  }
+  enum Response {
+    pending
+    accepted
+    declined
+  }
+}
+
+package "Business rules (app/services)" {
+  class RequestService <<service>> {
+    +submit_request(student, room_ids)
+    +withdraw_request(student)
+  }
+  class MatchingService <<service>> {
+    +run_matching(admin, algorithm, dry_run)
+    +compare_algorithms(admin)
+  }
+  class CycleService <<service>> {
+    +accept(student, cycle_id)
+    +decline(student, cycle_id)
+    +approve(admin, cycle_id)
+    +expire_overdue()
+  }
+}
+
+package "Matching engine (engine/)" {
+  class Participant {
+    id : int
+    seat : int
+    wants : tuple[int]
+    +acceptable()
+  }
+  class MatchResult {
+    cycles : tuple[Cycle]
+    unmatched : tuple[int]
+    assignment : dict[int, int]
+    rounds : tuple[Round]
+  }
+  class TTC <<utility>> {
+    +top_trading_cycles(participants) : MatchResult
+    +pairwise_swaps(participants) : MatchResult
+    +match_yield(result, pool_size) : float
+  }
+}
+
+User <|-- Student
+User <|-- Admin
+LoginSession "0..*" --> "1" User
+
+Hostel "1" *-- "1..*" Room
+Room "1" *-- "1..3" Seat
+Seat "0..1" -- "0..1" Student : occupant >
+
+Student "1" -- "0..*" SwapRequest : makes >
+SwapRequest "0..*" --> "1" Seat : offers >
+SwapRequest "1" *-- "1..5" Preference
+Preference "0..*" --> "1" Room : wants >
+
+MatchRun "1" *-- "0..*" SwapCycle
+SwapCycle "1" *-- "2..*" CycleMember
+CycleMember "0..*" --> "1" SwapRequest
+CycleMember --> Seat : gives / receives
+
+SwapRequest ..> RequestStatus
+SwapCycle ..> CycleStatus
+CycleMember ..> Response
+
+RequestService ..> SwapRequest : creates
+MatchingService ..> TTC : uses
+MatchingService ..> MatchRun : saves
+MatchingService ..> CycleService : expire_overdue()
+CycleService ..> SwapCycle : updates
+TTC ..> Participant
+TTC ..> MatchResult : returns
+@enduml
