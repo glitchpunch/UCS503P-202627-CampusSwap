@@ -1,40 +1,68 @@
-﻿![Tiet Logo](assets/tiet-logo.svg){ .tiet-logo }
+![Tiet Logo](assets/tiet-logo.svg){ .tiet-logo }
 
 **UCS503: Software Engineering (Project)**  
 **TIET Patiala**
 
-# The Sum Function in C++
+# CampusSwap: Hostel Room Exchange
 
-**Author(s)**:
+CampusSwap helps hostel students move to a room they like better, by finding
+**chains of swaps** where everyone involved ends up somewhere they prefer.
+It uses the **Top Trading Cycles (TTC)** algorithm, which can find 3-way and
+4-way chains (A takes B's room, B takes C's, C takes A's) that are almost
+impossible to spot by hand in WhatsApp groups.
 
-`(RGB)` Raghav B. Venkataramaiyer `<bv.raghav -at-
-thapar -dot- edu>`
+| Team member | Roll number |
+|---|---|
+| Jahnavi | 1024240152 |
+| Ronit Saini | 1024240102 |
+| Ranvir | 1024240001 |
+| Krishna Kapoor | 1024240010 |
 
-This project creates a sum function in c++ as a sample
-to illustrate how to compile a shared library and
-distribute it for use along with the binary.
+Submitted to: Dr. Raghav B. Venkataramaiyer.
 
-## Installation
+## What the prototype does
 
-``` shell
-make -C code
+The proposal defines Phase 1 success as *accepting a request, saving it to the
+database, running a match, and showing the result*. The prototype does all four,
+with real data, plus the confirmation step planned for Phase 2.
+
+1. **Log in** as a student or as hostel staff (the warden).
+2. **Feature 1: submit a ranked request.** A student browses rooms in the
+   hostels they are allowed to live in, ranks up to 5, and gets a tracking ID.
+3. **Feature 2: run a matching round.** The warden runs TTC over every open
+   request, sees each chain it found and the **Match Yield** (the share of
+   students matched), and can compare it with direct 1:1 swaps on the same pool.
+4. **Confirm and approve.** Every student in a chain confirms or declines within
+   48 hours; once all confirm, the warden approves and the rooms change hands.
+
+## Try it in two minutes
+
+```powershell
+python -m venv .venv
+.venv\Scripts\python -m pip install -r code/backend/requirements-dev.txt
+.venv\Scripts\python code/backend/run.py --reset
 ```
 
-This will create create a folder `dist` in `code`
-folder, with following contents
+Open <http://127.0.0.1:8000>. Every demo account uses the password `campus123`:
 
-```
-dist
- +-lib
- |  \-libbvr_math.so
- +-bin
-    \-run
-```
+| Account | Who |
+|---|---|
+| `warden@thapar.edu` | Hostel staff (admin) |
+| `student1@thapar.edu`, `student2@...`, `student3@...` | Students with no request yet, in Hostel M rooms A-101, B-101 and A-201 |
 
-## Usage
+All names, roll numbers and emails in the demo data are made up.
+See [Getting started](getting-started.md) for Linux/macOS commands, tests and the
+full demo script.
 
-``` shell
-cd code
-export LD_LIBRARY_PATH=dist/lib
-./dist/bin/run
-```
+## Where to read next
+
+- [Architecture](architecture.md): how the pieces fit together.
+- [Matching engine](matching-engine.md): TTC explained with a worked example.
+- [Diagrams](diagrams.md): Use Case, Class, Sequence and Activity diagrams.
+- [Study guide](study/index.md): what each team member must know for the viva.
+
+## Built with
+
+Python 3.12 and FastAPI for the server, SQLite (through SQLAlchemy) for the
+database, plain HTML and JavaScript with Tailwind CSS for the pages, pytest and
+GitHub Actions for testing, PlantUML for diagrams and MkDocs for this site.
