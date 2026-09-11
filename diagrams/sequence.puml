@@ -1,0 +1,62 @@
+@startuml sequence
+' CampusSwap — Sequence diagram: one swap from request to approval
+skinparam dpi 170
+skinparam defaultFontName "Arial"
+skinparam shadowing false
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #475569
+  ParticipantBackgroundColor #FFFFFF
+  ActorBorderColor #475569
+}
+autonumber
+
+actor Student
+actor "Warden" as Warden
+participant "Browser pages\n(rooms / dashboard / admin)" as UI
+participant "FastAPI routes\n(app/routers)" as API
+participant "Services\n(app/services)" as SVC
+participant "TTC engine\n(engine/)" as ENG
+database "SQLite" as DB
+
+== Feature 1: submit a ranked request ==
+Student -> UI : rank up to 5 rooms, press Submit
+UI -> API : POST /api/requests {room_ids}
+API -> SVC : submit_request(student, room_ids)
+SVC -> DB : check rules (own room, duplicates,\nhostel gender, one active request)
+SVC -> DB : INSERT swap_request (open) + preferences
+SVC --> API : tracking ID
+API --> UI : 201 {tracking_id: "CS-2026-0013"}
+
+== Feature 2: run a matching round ==
+Warden -> UI : press "Run TTC Matching Round"
+UI -> API : POST /api/admin/match-runs {algorithm: "ttc"}
+API -> SVC : run_matching(admin, "ttc", dry_run=false)
+SVC -> DB : expire overdue cycles; SELECT open requests
+SVC -> ENG : top_trading_cycles(participants)
+ENG --> SVC : cycles, who gets which seat, round-by-round trace
+SVC -> DB : INSERT match_run, swap_cycles, cycle_members\nUPDATE requests -> matched
+SVC --> API : run summary
+API --> UI : Match Yield + trace
+
+== Confirmation (48 hours) ==
+loop every member of the chain
+  Student -> UI : open dashboard, press Confirm
+  UI -> API : POST /api/cycles/{id}/accept
+  API -> SVC : accept(student, id)
+  SVC -> DB : member.response = accepted
+end
+alt everyone accepted
+  SVC -> DB : cycle.status = confirmed
+else someone declines, or the deadline passes
+  SVC -> DB : cycle.status = dissolved\ndecliner withdrawn, others back to "open"
+end
+
+== Warden approval ==
+Warden -> UI : press "Approve swap"
+UI -> API : POST /api/admin/cycles/{id}/approve
+API -> SVC : approve(admin, id)
+SVC -> DB : move each student to the seat they receive\nrequests -> completed, cycle -> approved
+API --> UI : 200 {status: "approved"}
+@enduml
