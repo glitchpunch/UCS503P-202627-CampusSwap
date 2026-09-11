@@ -86,14 +86,12 @@ def seed(db: Session, now: datetime | None = None) -> None:
 
     # one student per seat, in a stable order
     seats = db.scalars(select(Seat).join(Room).join(Hostel).order_by(Hostel.id, Room.id, Seat.id)).all()
-    demo_rooms = {("M", number) for number in DEMO_STUDENT_ROOMS}
-    demo_numbers = itertools.count(1)
+    demo_emails = {("M", number): f"student{n}@thapar.edu" for n, number in enumerate(DEMO_STUDENT_ROOMS, start=1)}
     for k, seat in enumerate(seats, start=1):
         hostel = seat.room.hostel
         firsts = FIRST_M if hostel.gender == "M" else FIRST_F
         first, last = firsts[k % len(firsts)], SURNAMES[(k // len(firsts)) % len(SURNAMES)]
-        is_demo = (hostel.code, seat.room.number) in demo_rooms
-        email = f"student{next(demo_numbers)}@thapar.edu" if is_demo else f"stu{k:03d}@thapar.edu"
+        email = demo_emails.get((hostel.code, seat.room.number), f"stu{k:03d}@thapar.edu")
         seat.occupant = Student(
             email=email, name=f"{first} {last}", password_hash=password_hash,
             roll_no=f"D24{k:04d}", gender=hostel.gender, year=1 + k % 4, branch=BRANCHES[k % len(BRANCHES)],
